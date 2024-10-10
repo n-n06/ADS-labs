@@ -1,5 +1,5 @@
 /*
-max heap
+max heap - amazing
  */
 #include <iostream>
 

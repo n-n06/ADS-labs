@@ -1,78 +1,99 @@
 #include <iostream>
+#include <vector>
 
 using namespace std;
+using l_int = long long;
 
-class Heap
-{
-private:
-    int* content;
-    int heap_size;
-    int arr_size;
-public:
-    Heap(int* arr, int size) {
-        content = new int[size];
-        for (int i = 0; i < size; i++) {
-            content[i] = arr[i];
-        }
-        heap_size = size;
-        arr_size = size;
-    };
+struct Heap {   //it is ok
+    vector<l_int> heap;
 
-    ~Heap() {
-        delete[] content;
-    };
-
-    void print() {
-        for (int i = 0; i < arr_size; i++) {
-            cout << content[i] << " ";
-        }
-        cout << endl;
-    }
-
-    int parent(int i) {
+    l_int parent(l_int i) { 
         return (i - 1) / 2; 
     }
 
-    int left(int i) {
-        return (i * 2 + 1);
+    l_int left(l_int i) { 
+        return (2 * i + 1); 
     }
 
-    int right(int i) {
-        return (i * 2 + 2);
+    l_int right(l_int i) {
+        return (2 * i + 2);
     }
-
-    void maxHeapify(int i) {
-        int largest = i;
-        int l = left(i);
-        int r = right(i);
-
-        if (content[l] > content[largest] && l < heap_size) {
-            largest = l;
-        }
-        if (content[r] > content[largest] && r < heap_size) {
-            largest = r;
-        }
-
-        if (largest != i) {
-            swap(content[i], content[largest]);
-            maxHeapify(largest);
+    
+    void maxHeapifyUp(l_int i) {
+        l_int p = parent(i);
+        if (i != 0 && heap[i] > heap[p]) {
+            swap(heap[i], heap[p]);
+            maxHeapifyUp(p);
         }
     }
 
-    void buildMaxHeap() {
-        for (int i = (heap_size - 2) / 2; i >= 0; i--) {
-            maxHeapify(i);
+    void maxHeapifyDown(l_int i) {
+        l_int l = left(i);
+        l_int r = right(i);
+        l_int max = i;
+        l_int size = heap.size();
+
+        if (l < size && heap[max] < heap[l]) {
+            max = l;
+        }
+        if (r < size && heap[max] < heap[r]) {
+            max = r;
+        }
+
+        if (max != i) {
+            swap(heap[i], heap[max]);
+            maxHeapifyDown(max);
         }
     }
+    
 
-    void heapsort() {
-        buildMaxHeap();
-        swap(content[0], content[heap_size - 1]);
-        heap_size--;
-        while (heap_size > 0) {
-            maxHeapify(0);
-            swap(content[0], content[heap_size - 1]);
-            heap_size--;
+    l_int getSize() {
+        return heap.size();
+    }
+
+    bool isEmpty() {
+        return heap.empty();
+    }
+
+    void insert(l_int x) {
+        heap.push_back(x);
+        maxHeapifyUp(heap.size() - 1);
+    }
+
+    void popMax() {
+        if (isEmpty()) return;
+        heap[0] = heap.back();
+        heap.pop_back();
+        maxHeapifyDown(0);
+    }
+
+    l_int getMax() {
+        if (!isEmpty()) {
+            return heap.front();
         }
     }
 };
+
+int main() {
+    l_int n; cin >> n;
+    l_int x; cin >> x;
+    l_int num;
+
+    Heap h;
+
+    for (l_int i = 0; i < n; i++) {
+        cin >> num;
+        h.insert(num);
+    }
+
+    l_int price = 0;
+    for (int i = 0; i < x; i++) {
+        price += h.getMax();
+        l_int new_ticket = h.getMax() - 1;
+        h.popMax();
+        h.insert(new_ticket);
+    }
+
+    cout << price;
+
+}
