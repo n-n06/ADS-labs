@@ -4,13 +4,11 @@
 using namespace std;
 using ll = long long int;
 
-char dehash(ll letter, ll prev, int pos) {
+char dehash(ll letter, ll& prev, int pos) {
     ll this_letter = letter - prev;
     this_letter /= pow(2, pos);
-    prev += letter;
-    return (char) 97 + this_letter;
-
-    
+    prev = letter;
+    return (char) (97 + this_letter);
 }
 
 int main() {
