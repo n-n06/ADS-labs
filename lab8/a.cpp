@@ -5,10 +5,9 @@
 #include <vector>
 
 using namespace std;
+const int MOD_VAL = 1e9 + 7; //define a constant
 
-#define MOD_VAL 1000000007; //define a constant
-
-long long int hash_func(string s) {
+string hash_func(string s) {
     long long int h_sum = 0;
     long long int power11 = 1;
 
@@ -19,11 +18,12 @@ long long int hash_func(string s) {
         power11 = (power11 * 11) % MOD_VAL; //optimize power as in rolling polynomial hashing
     }
 
-    return h_sum;
+    return to_string(h_sum);
 }
 
 int main() {
-    map <string, long long int> mp;
+    map <string, string> mp;
+    map <string, bool> checked; 
 
     long long int n; cin >> n;
     vector <string> arr(2*n);
@@ -33,10 +33,18 @@ int main() {
         mp[arr[i]] = hash_func(arr[i]);
     }
 
+    int pair_count = 0;
+
     for (string s : arr) {
-        vector<string>::iterator pos = find(arr.begin(), arr.end(), to_string(mp[s]));
-        if (pos != arr.end()) {
-            cout << "Hash of string \"" << s << "\" is " << mp[s] << endl;
+        if (pair_count == n) {
+            break;
+        }
+
+        if (mp.find(mp[s]) != mp.end()) {
+            cout << "Hash of string \"" << s <<"\" is " << mp[s] << endl;
+            pair_count++;
         }
     }
+
+
 }
