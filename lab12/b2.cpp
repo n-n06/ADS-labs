@@ -1,27 +1,22 @@
 #include <iostream>
-#include <vector>
 #include <cstdint>
+#include <vector>
 #include <algorithm>
-#include <set>
+#include <queue>
+#include <map>
 
 using namespace std;
-using ll = long long;
-
-ll n, m, a, b, c;
-vector<pair<ll,ll>> adj[1000000];
-ll dist[1000000];
-bool visited[1000000];
 
 class Heap
 {
 private:
-    vector<pair<ll, ll>> content;
+    vector<pair<int, int>> content;
     int heap_size;
     int arr_size;
 public:
-    Heap(ll* arr, ll size) {
+    Heap(vector<int> arr, int size) {
         content.resize(size);
-        for (ll i = 0; i < size; i++) {
+        for (int i = 0; i < size; i++) {
             content[i] = {i, arr[i]};
         }
         heap_size = size;
@@ -77,15 +72,15 @@ public:
 
 
 
-    pair<ll,ll> pop() {
-        pair<ll,ll> min = content[0];
+    pair<int,int> pop() {
+        pair<int,int> min = content[0];
         swap(content[0], content[heap_size - 1]);
         heap_size--;
         minHeapify(0);
         return min;
     }
     
-    void decreaseKey(ll v, ll new_key) {
+    void decreaseKey(int v, int new_key) {
         int index;
         for (int i = 0; i < heap_size; i++) {
             if (v == content[i].first) {
@@ -106,60 +101,73 @@ public:
     }
 };
 
-ll dijkstra(ll s, ll f){
-    for(ll i = 0; i < n; i++){
-        dist[i] = (ll) INT32_MAX;
+int v_size, e_size;
+vector<int> dist;
+vector<int> parent;
+int v1, v2, w;
+vector<vector<pair<int, int>>> adj;
+
+int dijkstra(int start, int end) {
+
+    for (int i = 0; i < v_size; i++) {
+        dist[i] = INT32_MAX;
+        parent[i] = -1;
     }
-    for(ll i = 0; i < n; i++){
+
+    dist[start] = 0;
+    bool visited[v_size];
+
+    for (int i = 0; i < v_size; i++) {
         visited[i] = false;
     }
-    dist[s] = 0;
-    // Heap p(dist, n);
 
-    set<pair<ll,ll>> q;
-    q.insert({dist[s], s});
-    
-    for(ll i = 0; i < n; i++){
-        if (q.empty()) {
-            break;
-        }
-    
-        ll v = q.begin()->second;
-        q.erase(q.begin());
-    
-        visited[v] = true;
-        for(pair<ll,ll> j : adj[v]){
-            ll to = j.first, len = j.second;
-            if (visited[to]) continue;
+    Heap pq(dist, v_size);
+    pq.buildMinHeap();
 
-            if (dist[v] + len < dist[to]){
-                q.erase({dist[to], to});
-                dist[to] = dist[v] + len;
-                q.insert({dist[to], to});
+    while (!pq.isEmpty()) {
+        pair<int, int> u = pq.pop();
+        visited[u.first] = true;
+        // cout << u.first << " ";
+        for (pair<int, int> edge : adj[u.first]) {
+            int v = edge.first;
+            int w = edge.second;
+            if (!visited[v]) {
+                if (dist[v] > dist[u.first] + w) {
+                    dist[v] = dist[u.first] + w;
+                    parent[v] = u.first;
+                    pq.decreaseKey(v, dist[v]);
+                }
             }
+
         }
     }
-    return dist[f];
+    return dist[end];
+
 }
 
-int main(){
-    cin >> n >> m;
-    for(ll i = 0; i < m; i++){
-        ll v1,v2,w;
+int main() {
+    cin >> v_size >> e_size;
+    // vector<pair<int, pair<int, int>>> edges;
+    dist.resize(v_size);
+    parent.resize(v_size);
+    adj.resize(v_size);
+
+    for (int i = 0; i < e_size; i++) {
         cin >> v1 >> v2 >> w;
-        v1--;
-        v2--;
-        adj[v1].push_back({v2, w});
-        adj[v2].push_back({v1, w});
+        v1--; v2--;
+        adj[v1].push_back({v2,w});
+        adj[v2].push_back({v1,w});
     }
-    ll d;
-    cin >> a >> b >> c >> d; a--;
-    b--;
-    c--;
-    d--;
-    ll ans = min(dijkstra(a, b) + dijkstra(b, c) + dijkstra(c, d),
-                dijkstra(a, c) + dijkstra(c, b) + dijkstra(b, d));
-    if (ans >= (ll) INT32_MAX) cout << -1;
-    else cout << ans;
-    return 0;
+
+    int s, a, b, f;
+    cin >> s >> a >> b >> f;
+    s--; a--; b--; f--;
+
+    int dist = min(dijkstra(s,a) + dijkstra(a,b) + dijkstra(b,f),
+                    dijkstra(s,b) + dijkstra(b, a) + dijkstra(a, f));
+    if (dist < 0) {
+        cout << -1;
+    } else {
+        cout << dist;
+    }
 }
